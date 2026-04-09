@@ -112,6 +112,7 @@ class MissedCallRequest(BaseModel):
 # ── Analytics ─────────────────────────────────────────────────────────────────
 
 class AnalyticsSummary(BaseModel):
+    business_id: Optional[str] = None
     total_leads: int
     new_leads_today: int
     bookings_today: int

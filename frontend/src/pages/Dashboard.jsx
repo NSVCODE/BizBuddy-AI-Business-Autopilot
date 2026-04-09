@@ -180,12 +180,24 @@ export default function Dashboard() {
           <div>
             <h1 className="text-white font-semibold text-lg tracking-tight">{pageTitle[active]}</h1>
           </div>
-          <button
-            onClick={fetchAll}
-            className="text-xs text-slate-500 hover:text-white transition-colors px-3 py-1.5 rounded-lg border border-white/[.07] hover:bg-white/[.05]"
-          >
-            Refresh
-          </button>
+          <div className="flex items-center gap-2">
+            {stats?.business_id && (
+              <a
+                href={`/?id=${stats.business_id}`}
+                target="_blank"
+                rel="noreferrer"
+                className="text-xs text-slate-500 hover:text-blue-400 transition-colors px-3 py-1.5 rounded-lg border border-white/[.07] hover:bg-white/[.05]"
+              >
+                View Customer Page ↗
+              </a>
+            )}
+            <button
+              onClick={fetchAll}
+              className="text-xs text-slate-500 hover:text-white transition-colors px-3 py-1.5 rounded-lg border border-white/[.07] hover:bg-white/[.05]"
+            >
+              Refresh
+            </button>
+          </div>
         </header>
 
         {/* Content */}

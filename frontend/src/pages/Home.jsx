@@ -64,7 +64,12 @@ export default function Home() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('/api/business/profile')
+    // Support ?id=<business_id> or ?user=<user_id> in the URL for multi-tenant demos
+    const params = new URLSearchParams(window.location.search)
+    const id = params.get('id')
+    const user = params.get('user')
+    const query = id ? `?id=${id}` : user ? `?user_id=${user}` : ''
+    fetch(`/api/business/profile${query}`)
       .then(r => r.json())
       .then(data => { setBusiness(data); setLoading(false) })
       .catch(() => setLoading(false))

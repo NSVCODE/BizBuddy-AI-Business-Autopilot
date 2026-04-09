@@ -72,12 +72,15 @@ TYPE_PERSONAS = {
 
 
 def build_system_prompt() -> str:
+    import sys
     cfg = RESTAURANT_CONFIG
     business = _get_active_business()
+    print(f"[BizBuddy DEBUG] build_system_prompt: business={business}", file=sys.stderr)
 
     # Use real business data if available, else fall back to LatteLune config
     biz_name = business.get("name", cfg["name"]) if business else cfg["name"]
     biz_type = business.get("type", "restaurant") if business else "restaurant"
+    print(f"[BizBuddy DEBUG] biz_name={biz_name}, biz_type={biz_type}", file=sys.stderr)
     biz_location = business.get("location", cfg["location"]) if business else cfg["location"]
     biz_phone = business.get("phone", cfg["phone"]) if business else cfg["phone"]
     biz_email = business.get("email", cfg.get("email", "")) if business else cfg.get("email", "")
