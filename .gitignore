@@ -22,6 +22,10 @@ frontend/dist/
 frontend/.vite/
 *.tsbuildinfo
 
+# WhatsApp service session data
+whatsapp-service/.wwebjs_auth/
+whatsapp-service/.wwebjs_cache/
+
 # IDE
 .vscode/settings.json
 .idea/
