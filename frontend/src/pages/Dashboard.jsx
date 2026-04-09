@@ -29,6 +29,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [waStatus, setWaStatus] = useState('offline')
   const [igStatus, setIgStatus] = useState('offline')
+  const [businessId, setBusinessId] = useState(null)
 
   const fetchAll = useCallback(async () => {
     setLoading(true)
@@ -73,6 +74,16 @@ export default function Dashboard() {
       setIgStatus(data.status)
     } catch { setIgStatus('offline') }
   }, [])
+
+  // Fetch the business belonging to the current logged-in user
+  useEffect(() => {
+    if (user?.id) {
+      fetch(`/api/business/profile?user_id=${user.id}`)
+        .then(r => r.json())
+        .then(data => { if (data?.id) setBusinessId(data.id) })
+        .catch(() => {})
+    }
+  }, [user])
 
   useEffect(() => { fetchAll() }, [fetchAll])
   useEffect(() => {
@@ -181,9 +192,9 @@ export default function Dashboard() {
             <h1 className="text-white font-semibold text-lg tracking-tight">{pageTitle[active]}</h1>
           </div>
           <div className="flex items-center gap-2">
-            {stats?.business_id && (
+            {businessId && (
               <a
-                href={`/?id=${stats.business_id}`}
+                href={`/?id=${businessId}`}
                 target="_blank"
                 rel="noreferrer"
                 className="text-xs text-slate-500 hover:text-blue-400 transition-colors px-3 py-1.5 rounded-lg border border-white/[.07] hover:bg-white/[.05]"
