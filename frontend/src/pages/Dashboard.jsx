@@ -472,13 +472,42 @@ function FAQManager() {
 
 // ── Instagram Connect Panel ────────────────────────────────────
 function InstagramConnect({ igStatus }) {
-  const configs = {
-    connected:      { color: 'bg-green-400', label: 'Connected' },
-    error:          { color: 'bg-red-500',   label: 'Error' },
-    no_credentials: { color: 'bg-yellow-400',label: 'Not configured' },
-    offline:        { color: 'bg-slate-600', label: 'Offline' },
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [connecting, setConnecting] = useState(false)
+  const [feedback, setFeedback] = useState('')
+
+  const statusConfigs = {
+    connected:   { color: 'bg-green-400',  label: 'Connected' },
+    connecting:  { color: 'bg-yellow-400', label: 'Connecting…' },
+    error:       { color: 'bg-red-500',    label: 'Login failed' },
+    no_credentials: { color: 'bg-yellow-400', label: 'Not configured' },
+    offline:     { color: 'bg-slate-600',  label: 'Service offline' },
   }
-  const c = configs[igStatus] || configs.offline
+  const c = statusConfigs[igStatus] || statusConfigs.offline
+
+  const handleConnect = async () => {
+    if (!username.trim() || !password.trim()) return
+    setConnecting(true)
+    setFeedback('')
+    try {
+      await fetch('/ig-api/configure', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: username.trim(), password }),
+      })
+      setFeedback('Connecting — this may take a few seconds…')
+      setPassword('')
+    } catch {
+      setFeedback('Could not reach Instagram service. Is it running?')
+    } finally {
+      setConnecting(false)
+    }
+  }
+
+  const handleDisconnect = async () => {
+    await fetch('/ig-api/disconnect', { method: 'POST' }).catch(() => {})
+  }
 
   return (
     <div className="glass p-6 flex flex-col gap-6">
@@ -502,24 +531,53 @@ function InstagramConnect({ igStatus }) {
             <p className="text-green-400 text-sm font-semibold">Connected — DMs are being handled by AI</p>
           </div>
           <p className="text-slate-500 text-xs">All incoming Instagram DMs are automatically replied to by your AI assistant.</p>
+          <button onClick={handleDisconnect} className="btn-ghost text-xs" style={{ width: 'auto', alignSelf: 'flex-start', padding: '0.4rem 1rem' }}>
+            Disconnect
+          </button>
         </div>
       )}
 
-      {(igStatus === 'offline' || igStatus === 'no_credentials' || igStatus === 'error') && (
+      {igStatus === 'offline' && (
+        <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg px-4 py-3 text-xs text-yellow-400">
+          Instagram service is not running. Start it first:<br />
+          <span className="font-mono mt-1 block">cd instagram-service &amp;&amp; npm start</span>
+        </div>
+      )}
+
+      {(igStatus === 'no_credentials' || igStatus === 'error' || igStatus === 'disconnected') && (
         <div className="flex flex-col gap-4">
-          <p className="text-slate-400 text-sm">
-            {igStatus === 'error'
-              ? 'Login failed — check your credentials in instagram-service/.env'
-              : 'Start the Instagram service with your credentials:'}
-          </p>
-          <div className="bg-black/40 border border-white/[.08] rounded-lg px-4 py-3 font-mono text-xs text-green-400 leading-loose">
-            cd instagram-service<br />
-            npm install<br />
-            <span className="text-slate-500"># Edit .env: set IG_USERNAME + IG_PASSWORD</span><br />
-            npm start
-          </div>
+          {igStatus === 'error' && (
+            <div className="bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3 text-xs text-red-400">
+              Login failed — double-check your username and password.
+            </div>
+          )}
+          <p className="text-slate-400 text-sm">Enter your Instagram business account credentials:</p>
+          <input
+            className="input-dark"
+            placeholder="Instagram username (without @)"
+            value={username}
+            onChange={e => setUsername(e.target.value)}
+            autoComplete="username"
+          />
+          <input
+            className="input-dark"
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            autoComplete="current-password"
+          />
+          {feedback && <p className="text-xs text-slate-400">{feedback}</p>}
+          <button
+            className="btn-primary"
+            onClick={handleConnect}
+            disabled={connecting || !username.trim() || !password.trim()}
+            style={{ width: 'auto', alignSelf: 'flex-start', padding: '0.5rem 1.25rem' }}
+          >
+            {connecting ? 'Connecting…' : 'Connect Instagram'}
+          </button>
           <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg px-4 py-3 text-xs text-yellow-400">
-            Use a dedicated Instagram account — not your personal one.
+            Use a dedicated business Instagram account — not your personal one.
           </div>
         </div>
       )}
