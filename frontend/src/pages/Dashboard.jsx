@@ -273,7 +273,7 @@ export default function Dashboard() {
 
           {active === 'faqs' && (
             <div className="fade-in max-w-2xl">
-              <FAQManager />
+              <FAQManager businessId={businessId} />
             </div>
           )}
 
@@ -361,7 +361,7 @@ function FAQIcon({ size = 16, className = '' }) {
 }
 
 // ── FAQ Manager ────────────────────────────────────────────────
-function FAQManager() {
+function FAQManager({ businessId }) {
   const [faqs, setFaqs] = useState([])
   const [loading, setLoading] = useState(true)
   const [question, setQuestion] = useState('')
@@ -373,19 +373,19 @@ function FAQManager() {
 
   const load = async () => {
     try {
-      const data = await getFAQs()
+      const data = await getFAQs(businessId)
       setFaqs(data)
     } catch { /* silent */ }
     finally { setLoading(false) }
   }
 
-  useEffect(() => { load() }, [])
+  useEffect(() => { load() }, [businessId])
 
   const handleAdd = async () => {
     if (!question.trim() || !answer.trim()) return
     setSaving(true)
     try {
-      await createFAQ(question.trim(), answer.trim())
+      await createFAQ(question.trim(), answer.trim(), businessId)
       setQuestion(''); setAnswer('')
       await load()
     } catch { /* silent */ }

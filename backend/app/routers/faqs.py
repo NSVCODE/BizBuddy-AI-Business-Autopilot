@@ -8,6 +8,7 @@ router = APIRouter(prefix="/api/faqs", tags=["faqs"])
 class FAQCreate(BaseModel):
     question: str
     answer: str
+    business_id: str | None = None
 
 
 class FAQUpdate(BaseModel):
@@ -24,16 +25,16 @@ def _get_business_id() -> str | None:
 
 
 @router.get("")
-async def list_faqs():
-    """List all FAQs for the active business."""
-    business_id = _get_business_id()
-    if not business_id:
+async def list_faqs(business_id: str | None = None):
+    """List all FAQs for the given business."""
+    bid = business_id or _get_business_id()
+    if not bid:
         return []
     db = get_supabase()
     result = (
         db.table("faqs")
         .select("*")
-        .eq("business_id", business_id)
+        .eq("business_id", bid)
         .order("created_at")
         .execute()
     )
@@ -43,12 +44,12 @@ async def list_faqs():
 @router.post("")
 async def create_faq(body: FAQCreate):
     """Create a new FAQ entry."""
-    business_id = _get_business_id()
-    if not business_id:
+    bid = body.business_id or _get_business_id()
+    if not bid:
         raise HTTPException(status_code=404, detail="No business found")
     db = get_supabase()
     result = db.table("faqs").insert({
-        "business_id": business_id,
+        "business_id": bid,
         "question": body.question,
         "answer": body.answer,
         "is_active": True,

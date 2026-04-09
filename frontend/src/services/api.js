@@ -49,11 +49,11 @@ export const getAnalytics = () =>
   api.get('/api/analytics/summary').then(r => r.data)
 
 // FAQs
-export const getFAQs = () =>
-  api.get('/api/faqs').then(r => r.data)
+export const getFAQs = (business_id) =>
+  api.get('/api/faqs', { params: business_id ? { business_id } : {} }).then(r => r.data)
 
-export const createFAQ = (question, answer) =>
-  api.post('/api/faqs', { question, answer }).then(r => r.data)
+export const createFAQ = (question, answer, business_id) =>
+  api.post('/api/faqs', { question, answer, business_id }).then(r => r.data)
 
 export const updateFAQ = (id, data) =>
   api.put(`/api/faqs/${id}`, data).then(r => r.data)
