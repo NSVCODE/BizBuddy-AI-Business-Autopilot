@@ -82,6 +82,9 @@ create table if not exists faqs (
 
 alter table faqs enable row level security;
 create policy "Public can read active faqs" on faqs for select using (true);
+create policy "Allow insert faqs" on faqs for insert with check (true);
+create policy "Allow update faqs" on faqs for update using (true);
+create policy "Allow delete faqs" on faqs for delete using (true);
 
 -- ── Indexes ──────────────────────────────────────────────────
 create index if not exists idx_messages_conversation on messages(conversation_id);
