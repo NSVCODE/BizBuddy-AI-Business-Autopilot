@@ -58,8 +58,8 @@ def check_availability(booking_date: str, booking_time: str, party_size: int) ->
             .execute()
         )
         existing = result.data or []
-        # Simple capacity: max 3 simultaneous bookings per slot (restaurant has ~25 seats)
-        if len(existing) >= 3:
+        # Simple capacity: max 2 simultaneous bookings per slot
+        if len(existing) >= 2:
             # Suggest nearby slots
             all_slots = cfg["slot_times"]
             idx = all_slots.index(booking_time)
@@ -149,7 +149,7 @@ def get_upcoming_slots(booking_date: str) -> list[str]:
             t = row["time"][:5]  # "HH:MM"
             booked_times[t] = booked_times.get(t, 0) + 1
 
-        available = [s for s in all_slots if booked_times.get(s, 0) < 3]
+        available = [s for s in all_slots if booked_times.get(s, 0) < 2]
         return available
     except Exception:
         return all_slots
