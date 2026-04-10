@@ -19,8 +19,8 @@ Small businesses — restaurants, salons, clinics, retail shops — lose custome
 | Feature | Description |
 |---|---|
 | 🧠 AI Conversation Engine | Claude Haiku-powered assistant with tool calling; responds contextually across all channels |
-| 📅 Booking System | AI collects name, date, time, and party size through natural conversation and confirms bookings |
-| 👥 Lead Capture | Auto-captures customer name, phone, email, and inquiry type from every conversation |
+| 📅 Booking System | AI collects name, date, time, and party size (up to 6) through natural conversation and confirms bookings |
+| 👥 Lead Capture | Auto-captures customer name, phone, email, and inquiry type from every conversation; leads from bookings are automatically marked as converted |
 | ❓ Custom FAQs | Business owners add FAQs via dashboard; injected live into the AI system prompt |
 | 💬 Web Chat Widget | Floating chat bubble on the customer-facing page, styled per business type |
 | 📱 WhatsApp Integration | Real WhatsApp via QR scan (whatsapp-web.js) plus a simulation mode for testing |
@@ -142,7 +142,7 @@ cp ../.env.example .env
 # Edit .env — fill in ANTHROPIC_API_KEY, SUPABASE_URL, SUPABASE_KEY
 
 pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
+python -m uvicorn app.main:app --reload --port 8000
 ```
 
 Backend runs at `http://localhost:8000`  
@@ -246,7 +246,7 @@ Existing small business tools typically address one channel at a time — a What
 ## 🔧 Feature Depth
 
 - **AI tool calling loop**: `ai_service.py` runs a full agentic loop until `stop_reason == "end_turn"` — the AI can chain multiple tool calls (e.g., check availability, then create booking, then capture lead) in a single user turn
-- **Booking conflict prevention**: `booking_service.py` enforces a maximum of 3 bookings per time slot before rejecting new ones
+- **Booking conflict prevention**: `booking_service.py` enforces a maximum of 3 bookings per time slot before rejecting new ones; party size is capped at 6
 - **Lead deduplication**: `lead_service.py` upserts by phone number — the same customer messaging from web and WhatsApp stays as one lead record, not two
 - **Booking deduplication in UI**: Dashboard deduplicates bookings by `phone|date|time` key, keeping the highest-status entry (confirmed > pending > cancelled > completed) to handle seed data edge cases
 - **Custom FAQs**: businesses add FAQs via the dashboard; these are fetched at request time and injected into the AI system prompt, overriding the static fallback config
