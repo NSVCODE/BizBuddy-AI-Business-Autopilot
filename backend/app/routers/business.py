@@ -106,19 +106,26 @@ _DEMO_BOOKINGS = {
 async def seed_demo_data(payload: dict):
     """
     Seed type-appropriate demo leads and bookings for a newly created business.
-    Called once from the onboarding flow.
+    Called once from the onboarding flow. Pass force=true to re-seed.
     """
     business_id = payload.get("business_id")
     biz_type = payload.get("type", "other")
+    force = payload.get("force", False)
     if not business_id:
         return {"status": "skipped", "reason": "no business_id"}
 
     db = get_supabase()
 
-    # Skip if data already exists
-    existing = db.table("leads").select("id").eq("business_id", business_id).limit(1).execute()
-    if existing.data:
-        return {"status": "skipped", "reason": "already seeded"}
+    # Skip if data already exists (unless forced)
+    if not force:
+        existing = db.table("leads").select("id").eq("business_id", business_id).limit(1).execute()
+        if existing.data:
+            return {"status": "skipped", "reason": "already seeded"}
+
+    # Force: wipe existing demo data for this business first
+    if force:
+        db.table("bookings").delete().eq("business_id", business_id).execute()
+        db.table("leads").delete().eq("business_id", business_id).execute()
 
     leads_data = _DEMO_LEADS.get(biz_type, _DEMO_LEADS["restaurant"])
     bookings_data = _DEMO_BOOKINGS.get(biz_type, _DEMO_BOOKINGS["restaurant"])

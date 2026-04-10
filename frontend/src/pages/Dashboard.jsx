@@ -7,7 +7,7 @@ import BookingsTable from '../components/Dashboard/BookingsTable'
 import ConversationsPanel from '../components/Dashboard/ConversationsPanel'
 import WhatsAppConnect from '../components/WhatsAppConnect/WhatsAppConnect'
 import AnalyticsPanel from '../components/Dashboard/AnalyticsPanel'
-import { getAnalytics, getLeads, getBookings, getConversations, getFAQs, createFAQ, updateFAQ, deleteFAQ } from '../services/api'
+import { getAnalytics, getLeads, getBookings, getConversations, getFAQs, createFAQ, updateFAQ, deleteFAQ, seedDemoData } from '../services/api'
 
 const NAV = [
   { id: 'overview',       label: 'Overview',       icon: GridIcon },
@@ -32,6 +32,8 @@ export default function Dashboard() {
   const [waStatus, setWaStatus] = useState('offline')
   const [igStatus, setIgStatus] = useState('offline')
   const [businessId, setBusinessId] = useState(null)
+  const [businessType, setBusinessType] = useState(null)
+  const [reseedLoading, setReseedLoading] = useState(false)
 
   const fetchAll = useCallback(async () => {
     setLoading(true)
@@ -82,7 +84,7 @@ export default function Dashboard() {
     if (user?.id) {
       fetch(`/api/business/profile?user_id=${user.id}`)
         .then(r => r.json())
-        .then(data => { if (data?.id) setBusinessId(data.id) })
+        .then(data => { if (data?.id) { setBusinessId(data.id); setBusinessType(data.type) } })
         .catch(() => {})
     }
   }, [user])
@@ -107,6 +109,19 @@ export default function Dashboard() {
   const handleSignOut = async () => {
     await signOut()
     navigate('/auth')
+  }
+
+  const handleReseedDemo = async () => {
+    if (!businessId || !businessType) return
+    setReseedLoading(true)
+    try {
+      await seedDemoData(businessId, businessType, true)
+      await fetchAll()
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setReseedLoading(false)
+    }
   }
 
   const counts = {
@@ -204,6 +219,18 @@ export default function Dashboard() {
               >
                 View Customer Page ↗
               </a>
+            )}
+            {businessId && (
+              <button
+                onClick={handleReseedDemo}
+                disabled={reseedLoading || loading}
+                title="Wipe and re-seed demo data for this business type"
+                className="text-xs text-slate-500 hover:text-amber-400 transition-colors px-3 py-1.5 rounded-lg border border-white/[.07] hover:bg-white/[.05] flex items-center gap-1.5 disabled:opacity-50"
+              >
+                {reseedLoading
+                  ? <><span className="spinner-sm" style={{ borderTopColor: '#f59e0b' }} /> Reseeding…</>
+                  : 'Reset Demo Data'}
+              </button>
             )}
             <button
               onClick={fetchAll}

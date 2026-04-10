@@ -51,8 +51,8 @@ export const getAnalytics = () =>
 export const getAnalyticsDetailed = () =>
   api.get('/api/analytics/detailed').then(r => r.data)
 
-export const seedDemoData = (business_id, type) =>
-  api.post('/api/business/seed-demo', { business_id, type }).then(r => r.data)
+export const seedDemoData = (business_id, type, force = false) =>
+  api.post('/api/business/seed-demo', { business_id, type, force }).then(r => r.data)
 
 // FAQs
 export const getFAQs = (business_id) =>
