@@ -31,6 +31,13 @@ def check_availability(booking_date: str, booking_time: str, party_size: int) ->
     if parsed_date < date.today():
         return {"available": False, "message": "That date has already passed. Please choose a future date."}
 
+    max_date = date.today() + timedelta(weeks=2)
+    if parsed_date > max_date:
+        return {
+            "available": False,
+            "message": f"Sorry, we only accept bookings up to 2 weeks in advance. The latest available date is {max_date.strftime('%A, %B %d')}.",
+        }
+
     # Validate time is in allowed slots
     if booking_time not in cfg["slot_times"]:
         slots_str = ", ".join(cfg["slot_times"])
