@@ -144,7 +144,7 @@ client.on('message', async (message) => {
         } catch (err) {
           console.error('[BizBuddy] Follow-up send error:', err.message)
         }
-      }, 10_000) // 10 seconds for demo
+      }, 60_000) // 1 minute
 
       pendingFollowUps.set(phone, handle)
       console.log(`[BizBuddy] Follow-up scheduled for +${phone} in 10s`)
