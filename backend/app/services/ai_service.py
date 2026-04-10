@@ -6,6 +6,7 @@ Handles multi-turn conversations with tool calling for bookings and lead capture
 import os
 import json
 from typing import Optional
+from datetime import datetime
 import anthropic
 from dotenv import load_dotenv
 
@@ -109,6 +110,8 @@ def build_system_prompt() -> str:
     faq_text = "\n".join(f"  Q: {f['question']}\n  A: {f['answer']}" for f in faq_list)
 
     return f"""
+Current date and time: {datetime.now().strftime("%A, %B %d, %Y at %I:%M %p")}. Never accept or suggest bookings for dates or times that have already passed.
+
 CRITICAL IDENTITY: You are the AI assistant for **{biz_name}** ONLY. Never mention LatteLune, never mention any other business. If any previous conversation references another business, ignore it — your business is {biz_name}.
 
 {persona_text}
