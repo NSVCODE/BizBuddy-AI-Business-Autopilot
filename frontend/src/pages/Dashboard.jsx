@@ -34,9 +34,10 @@ export default function Dashboard() {
   const [businessId, setBusinessId] = useState(null)
   const [businessType, setBusinessType] = useState(null)
   const [reseedLoading, setReseedLoading] = useState(false)
+  const [initialLoaded, setInitialLoaded] = useState(false)
 
-  const fetchAll = useCallback(async () => {
-    setLoading(true)
+  const fetchAll = useCallback(async (isBackground = false) => {
+    if (!isBackground) setLoading(true)
     try {
       const [s, l, b, c] = await Promise.all([getAnalytics(), getLeads(businessId), getBookings(businessId), getConversations()])
       setStats(s); setLeads(l)
@@ -52,6 +53,7 @@ export default function Dashboard() {
       }
       setBookings([...bookingMap.values()])
       setConversations(c.filter(conv => conv.channel === 'whatsapp'))
+      setInitialLoaded(true)
     } catch (err) {
       console.error(err)
     } finally {
@@ -91,7 +93,7 @@ export default function Dashboard() {
 
   useEffect(() => { fetchAll() }, [fetchAll, businessId])
   useEffect(() => {
-    const iv = setInterval(fetchAll, 30000)
+    const iv = setInterval(() => fetchAll(true), 30000)
     return () => clearInterval(iv)
   }, [fetchAll])
   useEffect(() => {

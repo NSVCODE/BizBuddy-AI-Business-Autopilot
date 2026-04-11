@@ -3,7 +3,6 @@ WhatsApp simulation router.
 Simulates incoming WhatsApp messages and missed call auto-follow-ups.
 """
 
-import uuid
 from fastapi import APIRouter
 from app.models.schemas import WhatsAppMessage, MissedCallRequest, ChatResponse
 from app.services.ai_service import process_message, _get_active_business
@@ -32,7 +31,9 @@ def _to_whatsapp_format(text: str) -> str:
 
 def _get_session(phone: str) -> str:
     if phone not in _wa_sessions:
-        _wa_sessions[phone] = f"wa_{phone.replace('+', '').replace(' ', '')}_{uuid.uuid4().hex[:8]}"
+        # Deterministic session ID — same phone always maps to same session
+        # so conversation history survives backend restarts
+        _wa_sessions[phone] = f"wa_{phone.replace('+', '').replace(' ', '')}"
     return _wa_sessions[phone]
 
 
