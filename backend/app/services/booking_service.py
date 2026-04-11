@@ -125,9 +125,8 @@ def create_booking(
         f"📅 {day_name} at {booking_time}\n"
         f"👥 {party_size} guest(s)\n"
         + loc_line
-        + f"📞 {phone}\n"
         + (f"📝 Notes: {special_requests}\n" if special_requests else "")
-        + f"\nWe can't wait to see you! If you need to make any changes, feel free to message us here."
+        + f"\nWe can't wait to see you! If you need to make any changes, just reply here."
     )
 
     return {"booking": booking, "confirmation_message": confirmation}
