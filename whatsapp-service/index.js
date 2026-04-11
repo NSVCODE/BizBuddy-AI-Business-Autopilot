@@ -105,7 +105,14 @@ function looksLikeBookingConfirmed(text) {
 
 client.on('message', async (message) => {
   // Ignore group messages and status updates
-  if (message.isGroupMsg || message.from === 'status@broadcast') return
+  // message.from ends with @g.us for groups, @c.us for individuals
+  // isGroupMsg is unreliable in whatsapp-web.js, so check both
+  if (
+    message.isGroupMsg ||
+    message.from.endsWith('@g.us') ||
+    message.from === 'status@broadcast' ||
+    message.from.endsWith('@broadcast')
+  ) return
 
   const phone = message.from.replace('@c.us', '')
   const sessionId = `wa_${phone.replace(/\D/g, '')}`

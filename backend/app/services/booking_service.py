@@ -43,7 +43,7 @@ def check_availability(booking_date: str, booking_time: str, party_size: int) ->
         slots_str = ", ".join(cfg["slot_times"])
         return {
             "available": False,
-            "message": f"That time slot isn't available. Our booking slots are: {slots_str}",
+            "message": f"That time slot isn't available. Our booking slots are: {slots_str}. NOTE FOR AI: You already have the customer's name, phone, date, and guest count — do NOT ask for them again. Pick the nearest slot to what they requested and call check_availability immediately.",
         }
 
     # Check existing bookings at that slot
@@ -58,8 +58,8 @@ def check_availability(booking_date: str, booking_time: str, party_size: int) ->
             .execute()
         )
         existing = result.data or []
-        # Simple capacity: max 2 simultaneous bookings per slot
-        if len(existing) >= 2:
+        # Simple capacity: max 3 simultaneous bookings per slot (restaurant has ~25 seats)
+        if len(existing) >= 3:
             # Suggest nearby slots
             all_slots = cfg["slot_times"]
             idx = all_slots.index(booking_time)
@@ -71,7 +71,7 @@ def check_availability(booking_date: str, booking_time: str, party_size: int) ->
             nearby_str = " or ".join(nearby) if nearby else "another time"
             return {
                 "available": False,
-                "message": f"That slot is fully booked. You might try {nearby_str} on the same day.",
+                "message": f"That slot is fully booked. You might try {nearby_str} on the same day. NOTE FOR AI: You already have the customer's name, phone, date, and guest count — do NOT ask for them again. Just ask which alternative slot they prefer, then immediately call check_availability and create_booking.",
             }
     except Exception:
         # If DB check fails, still allow booking (graceful degradation)
@@ -152,7 +152,7 @@ def get_upcoming_slots(booking_date: str) -> list[str]:
             t = row["time"][:5]  # "HH:MM"
             booked_times[t] = booked_times.get(t, 0) + 1
 
-        available = [s for s in all_slots if booked_times.get(s, 0) < 2]
+        available = [s for s in all_slots if booked_times.get(s, 0) < 3]
         return available
     except Exception:
         return all_slots
